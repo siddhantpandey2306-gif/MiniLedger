@@ -1,0 +1,244 @@
+{
+  "info": {
+    "_postman_id": "c1f7b88e-4a62-4f32-9cb1-7b7f16eb9f31",
+    "name": "MiniLedger API",
+    "description": "MiniLedger REST API collection for tracking money lent to friends",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Request Mock OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/request-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "request-otp"]
+            },
+            "description": "Requests a mock OTP. The OTP is logged strictly to the backend terminal console."
+          }
+        },
+        {
+          "name": "2. Verify OTP & Receive JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('auth_token', json.token);",
+                  "    console.log('Token updated automatically');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-otp"]
+            },
+            "description": "Provide the 6-digit OTP printed in the backend console."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "Create Loan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"friend_name\": \"Rohan Sharma\",\n  \"amount\": 1500,\n  \"due_date\": \"2026-11-15\",\n  \"notes\": \"Weekend road trip dinner and fuel\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/loans",
+              "host": ["{{base_url}}"],
+              "path": ["loans"]
+            }
+          }
+        },
+        {
+          "name": "Get User Loans (All)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/loans",
+              "host": ["{{base_url}}"],
+              "path": ["loans"]
+            }
+          }
+        },
+        {
+          "name": "Get Loans Filtered (Status=pending)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/loans?status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["loans"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Loan as Repaid",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/loans/:id/repay",
+              "host": ["{{base_url}}"],
+              "path": ["loans", ":id", "repay"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "replace-with-loan-id"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Summary",
+      "item": [
+        {
+          "name": "Get Financial Summary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/summary",
+              "host": ["{{base_url}}"],
+              "path": ["summary"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
