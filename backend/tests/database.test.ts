@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { query } from '../src/config/db';
 import { LoanService } from '../src/services/loan.service';
 
