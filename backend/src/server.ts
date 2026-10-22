@@ -5,7 +5,7 @@ import { ensureDatabaseConnection } from './config/db';
 const startServer = async () => {
   await ensureDatabaseConnection();
 
-  const server = app.listen(config.port, () => {
+  const server = app.listen(config.port, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(`MiniLedger Backend Service Running`);
     console.log(`Port:        ${config.port}`);
